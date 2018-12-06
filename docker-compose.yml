@@ -1,0 +1,41 @@
+version: '3'
+services:
+  miner:
+    build: .
+    container_name: miner
+    volumes:
+      - ./bsv:/root/.bitcoin
+      - ./bitcoin.conf:/root/.bitcoin/bitcoin.conf
+    ports:
+      - "18332:18332"
+      - "18333:18333"
+      - "28332:28332"
+    expose:
+      - "18332"
+      - "18333"
+      - "28332"
+    command: ["-addnode=node1:18333", "-addnode=node2:18333", "-zmqpubhashblock=tcp://*:28332", "-zmqpubhashtx=tcp://*:28332"]
+  node1:
+    build: .
+    container_name: node1
+    volumes:
+      - ./bitcoin.conf:/root/.bitcoin/bitcoin.conf
+    ports:
+      - "48332:18332"
+      - "48333:18333"
+    expose:
+      - "18332"
+      - "18333"
+    command: ["-addnode=miner:18333", "-addnode=node2:18333"]
+  node2:
+    build: .
+    container_name: node2
+    volumes:
+      - ./bitcoin.conf:/root/.bitcoin/bitcoin.conf
+    ports:
+      - "58332:18332"
+      - "58333:18333"
+    expose:
+      - "18332"
+      - "18333"
+    command: ["-addnode=node1:18333", "-addnode=miner:18333"]
